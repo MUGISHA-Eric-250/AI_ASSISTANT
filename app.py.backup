@@ -1,0 +1,31 @@
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
+from flask_cors import CORS
+import sqlite3
+import os
+import requests
+import json
+import base64
+import subprocess
+import time
+import re
+import io
+import sys
+import traceback
+import urllib.parse
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+import math
+import random
+from functools import wraps
+import threading
+import asyncio
+
+# Import MCP
+from mcp_client import MCPChatbotClient
+
+app = Flask(__name__)
+app.secret_key = 'your-secret-key-here-change-in-production'
+CORS(app)
+
+# ... rest of your configuration and routes ...

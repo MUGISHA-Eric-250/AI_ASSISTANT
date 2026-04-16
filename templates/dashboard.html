@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MFASHA AI - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+        }
+
+        .nav-item:hover {
+            background: #f0f0f0;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+        }
+
+        .logout-btn {
+            margin: 20px;
+            padding: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            font-size: 1.1rem;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .input-area button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Terminal Panel */
+        .terminal-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 400px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .terminal-header {
+            background: #2d2d2d;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .terminal-header h4 {
+            color: #fff;
+        }
+
+        .terminal-controls button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: #1e1e1e;
+        }
+
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .terminal-input-line {
+            display: flex;
+            padding: 10px;
+            background: #2d2d2d;
+            border-top: 1px solid #3d3d3d;
+        }
+
+        .terminal-prompt {
+            color: #4ec9b0;
+            margin-right: 10px;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            outline: none;
+        }
+
+        /* Files Panel */
+        .files-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+        }
+
+        .files-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .files-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .file-item {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+        }
+
+        .file-item:hover {
+            background: #f0f0f0;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>MFASHA AI</h2>
+                <p>Welcome, {{ username }}!</p>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active" data-view="chat">
+                    <span>💬</span> Chat
+                </div>
+                <div class="nav-item" data-view="terminal" id="openTerminalBtn">
+                    <span>🖥️</span> Terminal
+                </div>
+                <div class="nav-item" data-view="files" id="openFilesBtn">
+                    <span>📁</span> Files
+                </div>
+                <div class="nav-item" id="exportChatBtn">
+                    <span>📥</span> Export Chat
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+        </div>
+
+        <div class="main-content">
+            <div class="chat-area">
+                <div class="chat-header">
+                    <h3>💬 AI Assistant</h3>
+                    <div class="header-buttons">
+                        <button class="header-btn" onclick="clearChat()">Clear</button>
+                    </div>
+                </div>
+                <div class="messages" id="messages">
+                    <div class="message bot">
+                        <div class="message-content">
+                            Hello! I'm MFASHA AI Assistant.<br>
+                            How can I help you today?
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+                    <button onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terminal Panel -->
+    <div class="terminal-panel" id="terminalPanel">
+        <div class="terminal-header">
+            <h4>🖥️ System Terminal</h4>
+            <div class="terminal-controls">
+                <button onclick="closeTerminal()">Close</button>
+            </div>
+        </div>
+        <div class="terminal-output" id="terminalOutput">
+            <div class="terminal-line">Terminal ready. Type commands below.</div>
+            <div class="terminal-line">Current directory: ~</div>
+        </div>
+        <div class="terminal-input-line">
+            <span class="terminal-prompt">$></span>
+            <input type="text" class="terminal-input" id="terminalInput" placeholder="Enter command..." onkeypress="handleTerminalKeyPress(event)">
+        </div>
+    </div>
+
+    <!-- Files Panel -->
+    <div class="files-panel" id="filesPanel">
+        <div class="files-header">
+            <h4>📁 My Files</h4>
+            <button onclick="closeFiles()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
+        </div>
+        <div class="files-list" id="filesList">
+            <div style="text-align: center; padding: 20px;">Loading files...</div>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid #e0e0e0;">
+            <input type="file" id="fileUpload" style="display: none;" onchange="uploadFile(this)">
+            <button onclick="document.getElementById('fileUpload').click()" style="width: 100%; padding: 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                📤 Upload File
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let terminalSessionId = null;
+        let currentDirectory = '~';
+
+        // Load messages from localStorage
+        function loadMessages() {
+            const saved = localStorage.getItem('chat_messages');
+            if (saved) {
+                const messages = JSON.parse(saved);
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+                messages.forEach(msg => {
+                    addMessageToUI(msg.text, msg.sender, msg.time);
+                });
+            }
+        }
+
+        // Save messages to localStorage
+        function saveMessage(text, sender, time) {
+            const saved = localStorage.getItem('chat_messages');
+            let messages = saved ? JSON.parse(saved) : [];
+            messages.push({ text, sender, time });
+            if (messages.length > 100) messages.shift();
+            localStorage.setItem('chat_messages', JSON.stringify(messages));
+        }
+
+        function addMessageToUI(text, sender, time) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    ${text.replace(/\n/g, '<br>')}
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addMessage(text, sender) {
+            const time = new Date().toLocaleTimeString();
+            addMessageToUI(text, sender, time);
+            saveMessage(text, sender, time);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Show loading
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message bot';
+            loadingDiv.innerHTML = '<div class="message-content"><div class="loading"></div> Thinking...</div>';
+            document.getElementById('messages').appendChild(loadingDiv);
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                loadingDiv.remove();
+                
+                if (data.response) {
+                    addMessage(data.response, 'bot');
+                } else {
+                    addMessage('Sorry, an error occurred.', 'bot');
+                }
+            } catch (error) {
+                loadingDiv.remove();
+                addMessage('Error connecting to server.', 'bot');
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Terminal Functions
+        async function startTerminal() {
+            try {
+                const response = await fetch('/api/terminal/start');
+                const data = await response.json();
+                if (data.success) {
+                    terminalSessionId = data.session_id;
+                    currentDirectory = data.current_dir;
+                    addTerminalLine(`Terminal started. Current directory: ${currentDirectory}`);
+                    return true;
+                } else {
+                    addTerminalLine('Failed to start terminal: ' + (data.error || 'Unknown error'));
+                    return false;
+                }
+            } catch (error) {
+                addTerminalLine('Error starting terminal: ' + error.message);
+                return false;
+            }
+        }
+
+        async function executeTerminalCommand(command) {
+            if (!terminalSessionId) {
+                await startTerminal();
+            }
+            
+            if (!command.trim()) return;
+            
+            addTerminalLine(`$> ${command}`);
+            
+            try {
+                const response = await fetch('/api/terminal/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: terminalSessionId, command: command })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    if (data.output) {
+                        addTerminalLine(data.output);
+                    }
+                    if (data.current_dir) {
+                        currentDirectory = data.current_dir;
+                        updateTerminalPrompt();
+                    }
+                } else {
+                    addTerminalLine('Error: ' + (data.error || 'Command failed'));
+                }
+            } catch (error) {
+                addTerminalLine('Error: ' + error.message);
+            }
+        }
+
+        function addTerminalLine(text) {
+            const output = document.getElementById('terminalOutput');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.textContent = text;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateTerminalPrompt() {
+            const prompt = document.querySelector('.terminal-prompt');
+            if (prompt) {
+                prompt.textContent = `${currentDirectory}>`;
+            }
+        }
+
+        function handleTerminalKeyPress(event) {
+            if (event.key === 'Enter') {
+                const input = document.getElementById('terminalInput');
+                const command = input.value;
+                input.value = '';
+                executeTerminalCommand(command);
+            }
+        }
+
+        function openTerminal() {
+            const panel = document.getElementById('terminalPanel');
+            if (panel.style.display === 'flex') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'flex';
+                if (!terminalSessionId) {
+                    startTerminal();
+                }
+            }
+        }
+
+        function closeTerminal() {
+            document.getElementById('terminalPanel').style.display = 'none';
+        }
+
+        // Files Functions
+        async function loadFiles() {
+            try {
+                const response = await fetch('/get_files');
+                const files = await response.json();
+                const filesList = document.getElementById('filesList');
+                
+                if (files.length === 0) {
+                    filesList.innerHTML = '<div style="text-align: center; padding: 20px;">No files uploaded yet</div>';
+                    return;
+                }
+                
+                filesList.innerHTML = '';
+                files.forEach(file => {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'file-item';
+                    fileDiv.innerHTML = `
+                        <strong>${file.filename}</strong><br>
+                        <small>Type: ${file.file_type}</small><br>
+                        <small>Uploaded: ${new Date(file.uploaded_at).toLocaleString()}</small>
+                    `;
+                    filesList.appendChild(fileDiv);
+                });
+            } catch (error) {
+                console.error('Error loading files:', error);
+            }
+        }
+
+        async function uploadFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            addMessage(`Uploading: ${file.name}...`, 'user');
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    addMessage(data.message, 'bot');
+                    loadFiles();
+                } else {
+                    addMessage('Upload failed: ' + (data.error || 'Unknown error'), 'bot');
+                }
+            } catch (error) {
+                addMessage('Upload error: ' + error.message, 'bot');
+            }
+            
+            input.value = '';
+        }
+
+        function openFiles() {
+            const panel = document.getElementById('filesPanel');
+            if (panel.style.display === 'flex') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'flex';
+                loadFiles();
+            }
+        }
+
+        function closeFiles() {
+            document.getElementById('filesPanel').style.display = 'none';
+        }
+
+        async function exportChat() {
+            try {
+                window.location.href = '/export_chat';
+                addMessage('Chat export started!', 'bot');
+            } catch (error) {
+                addMessage('Export failed: ' + error.message, 'bot');
+            }
+        }
+
+        function clearChat() {
+            if (confirm('Clear all chat messages?')) {
+                localStorage.removeItem('chat_messages');
+                document.getElementById('messages').innerHTML = `
+                    <div class="message bot">
+                        <div class="message-content">
+                            Chat cleared! How can I help you?
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('openTerminalBtn').addEventListener('click', openTerminal);
+        document.getElementById('openFilesBtn').addEventListener('click', openFiles);
+        document.getElementById('exportChatBtn').addEventListener('click', exportChat);
+
+        // Load messages on startup
+        loadMessages();
+
+        // Close panels when clicking outside
+        document.addEventListener('click', function(event) {
+            const terminal = document.getElementById('terminalPanel');
+            const files = document.getElementById('filesPanel');
+            const terminalBtn = document.getElementById('openTerminalBtn');
+            const filesBtn = document.getElementById('openFilesBtn');
+            
+            if (terminal.style.display === 'flex' && !terminal.contains(event.target) && !terminalBtn.contains(event.target)) {
+                terminal.style.display = 'none';
+            }
+            if (files.style.display === 'flex' && !files.contains(event.target) && !filesBtn.contains(event.target)) {
+                files.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
