@@ -853,18 +853,7 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-if __name__ == '__main__':
-    print("=" * 60)
-    print("MFASHA AI Server Starting...")
-    print("=" * 60)
-    print("Server running at: http://localhost:5000")
-    print("=" * 60)
-    print("IMPORTANT: For AI responses, start Ollama in another terminal:")
-    print("  ollama serve")
-    print("=" * 60)
-    print("TERMINAL FEATURE: Use the terminal button to run system commands")
-    print("=" * 60)
-    print("Press CTRL+C to stop the server")
-    print("=" * 60)
-    
-    app.run(debug=True, host='127.0.0.1', port=5000)   
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
